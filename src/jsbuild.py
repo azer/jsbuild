@@ -8,16 +8,18 @@ __status__ = "Development"
 
 from functools import partial
 from jsmin import jsmin as minify
-from os.path import splitext, dirname
+from os.path import splitext, dirname, abspath
 from sys import argv as args
-import re
+import re, inspect
 
 from pdb import set_trace
 
-with open('templates/package.js') as pkg_template:
+DIR = dirname( inspect.getfile( inspect.currentframe() ) ) # Source Directory
+
+with open('%s/templates/package.js'%DIR) as pkg_template:
   PACKAGE_TEMPLATE = pkg_template.read()
 
-with open('templates/module.js') as mod_template:
+with open('%s/templates/module.js'%DIR) as mod_template:
   MODULE_TEMPLATE = mod_template.read()
 
 TYPE_MAP = {}
@@ -49,7 +51,7 @@ class Dependency:
 
   @property
   def working_dir(self):
-    return '%s%s'%('%s/'%self.index.working_dir if self.index else '',self._workingDir_ or '')
+    return '%s%s'%(self.index.working_dir+'/' if self.index and self.index.working_dir else '',self._workingDir_ or '')
 
   @working_dir.setter
   def working_dir(self,path):
@@ -57,7 +59,7 @@ class Dependency:
   
   def read(self):
     try:
-      with open('%s%s'%(self.index and self.index.working_dir+'/' or '',self.src)) as fl:
+      with open('%s%s'%(self.index.working_dir+'/' if self.index and self.index.working_dir else '',self.src)) as fl:
         return fl.read()
     except:
       set_trace()
@@ -80,7 +82,7 @@ class Index(Dependency):
 
   @property
   def content(self):
-    content = '\n'.join( map( lambda dep: dep.content, self.dependencies) )
+    content = PACKAGE_TEMPLATE%{ "name":self.manifest['name'], "content":'\n'.join( map( lambda dep: MODULE_TEMPLATE%{ "name":self.manifest['name'], "filename":dep.src, 'content':dep.content }, self.dependencies) ) }
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
@@ -104,6 +106,8 @@ class Index(Dependency):
     return self.manifest['build'].__contains__(key) and self.manifest['build'][key] or default
 
   def import_manifest(self):
+    self._workingDir_ = self.get_config('dir',self._workingDir_)
+
     for depinfo in self.get_config('files',[]):
       src = None
       cls = None
@@ -137,7 +141,7 @@ FORMAT_MAP['js'] = JSFile
 
 class JSONIndex(Index):
   def __init__(self,*args,**kwargs):
-    super(YAMLIndex,self).__init__(*args,**kwargs)
+    super(JSONIndex,self).__init__(*args,**kwargs)
     self.lib = __import__('json')
     self.parse = self.lib.loads
 
@@ -159,6 +163,6 @@ def get_class_by_format(filename):
 
 if __name__ == '__main__' and len(args)>1:
   src = args[1]
-  ind = YAMLIndex(src)
-  ind.working_dir = dirname(__file__) 
+  ind = Index(src)
+  ind.working_dir = dirname(src) 
   ind.put()
