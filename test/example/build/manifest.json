@@ -1,0 +1,11 @@
+{
+  "name":"azer",
+  "build":{
+    "dir":"",
+    "filename":"azer.js",
+    "files":[
+      "math.js",
+      "increment.js"
+    ]
+  }
+}
