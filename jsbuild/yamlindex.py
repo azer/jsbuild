@@ -1,4 +1,4 @@
-from index import Index
+from jsbuild.index import Index
 
 class YAMLIndex(Index):
   def parse(self):

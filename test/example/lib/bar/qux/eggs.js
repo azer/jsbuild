@@ -1,2 +1,2 @@
 var eggs = exports.eggs = "bar/qux/eggs.js";
-var require("../quux/ham");
+exports.ham = require("../quux/ham");

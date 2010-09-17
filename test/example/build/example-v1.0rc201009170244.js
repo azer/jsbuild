@@ -1,4 +1,4 @@
-var %(name)s = (function(globals,undefined){
+var example = (function(globals,undefined){
 
   var jsbuild = (function(){
 
@@ -99,4 +99,39 @@ var %(name)s = (function(globals,undefined){
 
 })(this); 
 
-%(content)s
+example._jsbuild_.defineModule("corge.js",function(exports,module,require){
+ var corge = exports.corge = "corge.js";
+exports.foo = require("./foo/foo");
+exports.bar = require("./bar/bar");
+ 
+});
+
+example._jsbuild_.defineModule("foo/foo.js",function(exports,module,require){
+ var foo = exports.foo = "foo/foo.js";
+ 
+});
+
+example._jsbuild_.defineModule("bar/bar.js",function(exports,module,require){
+ var bar = exports.bar = "bar/bar.js";
+exports.eggs = require("./qux/eggs");
+ 
+});
+
+example._jsbuild_.defineModule("bar/qux/eggs.js",function(exports,module,require){
+ var eggs = exports.eggs = "bar/qux/eggs.js";
+exports.ham = require("../quux/ham");
+ 
+});
+
+example._jsbuild_.defineModule("bar/quux/spam.js",function(exports,module,require){
+ var spam = exports.spam = "bar/spam.js";
+exports.foo = require("../../foo/foo");
+ 
+});
+
+example._jsbuild_.defineModule("bar/quux/ham.js",function(exports,module,require){
+ var ham = exports.ham = "bar/quux/ham.js";
+exports.spam = require("./spam");
+ 
+});
+

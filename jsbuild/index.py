@@ -1,10 +1,10 @@
-from dependency import Dependency
 from functools import partial
 from glob import glob
-from manifest import Manifest
+from jsbuild.dependency import Dependency
+from jsbuild.manifest import Manifest
 from itertools import chain
+from jsbuild import templates
 import re
-import templates
 
 class Index(Dependency):
   def __init__(self,*args,**kwargs):
@@ -21,7 +21,7 @@ class Index(Dependency):
 
   @property
   def content(self):
-    content = templates.jspackage%{ "name":self.manifest.name, "content":'\n'.join( map( lambda dep: jsmodule%{ "name":self.manifest.name, "filename":dep.src, 'content':dep.content }, self.dependencies) ) }
+    content = templates.jspackage%{ "name":self.manifest.name, "content":'\n'.join( map( lambda dep: templates.jsmodule%{ "name":self.manifest.name, "filename":dep.src, 'content':dep.content }, self.dependencies) ) }
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
@@ -38,30 +38,24 @@ class Index(Dependency):
     return self.manifest.build.__contains__(key) and self.manifest['build'][key] or default
 
   def import_manifest(self):
-    from maps import get_class_by_format
+    from jsbuild.maps import get_class_by_format
 
     dir_spec = self.get_config('dir',None)
-    if dir_spec: self.working_dir = self.working_dir + '/' + ( dirname(dir_spec) if re.findall('\/$',dir_spec) else dir_spec )
+    if dir_spec: self.working_dir = (self.working_dir + '/' if self.working_dir else '') + ( dirname(dir_spec) if re.findall('\/$',dir_spec) else dir_spec )
 
     files = [ el for el in map(partial(lambda index, path: (index.working_dir and index.working_dir+'/' or '')+path,self),self.get_config('files',[])) ]
 
     for depinfo in chain(*map(glob,files)):
       src = None
       cls = None
-      if isinstance(depinfo,str):
-        src = depinfo
-        cls = get_class_by_format(src)
-      elif isinstance(depinfo,dict) and depinfo.__contains__('src'):
-        src = depinfo['src']
-        cls = TYPE_MAP[depinfo['type']] if depinfo.__contains__('type') else get_class_by_format(src)
-      else:
-        raise Exception('Could not resolve dependency info:',depinfo)
-
+      src = depinfo
+      cls = get_class_by_format(src)
+      if self.working_dir: src = src[len(self.working_dir)+1:]
       self.dependencies.append(cls(src=src,index=self))
 
   def parse(self,content):
     raise Exception('Not Implemented')
 
   def put(self):
-    with open('%s'%self.get_config('filename')%self.get_config('dict',{}),'w') as fl:
+    with open('%s'%self.get_config('filename'),'w') as fl:
       fl.write(self.content)

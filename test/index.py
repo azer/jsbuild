@@ -1,7 +1,7 @@
+#!/usr/bin/python3
 import unittest
 import sys
 sys.path.append('../')
-sys.path.append('../jsbuild')
 sys.path.pop(0)
 
 from jsbuild.index import Index

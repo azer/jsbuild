@@ -1,4 +1,5 @@
-from attrdict import AttrDict
+from jsbuild.attrdict import AttrDict
+from time import strftime
 
 class Manifest(AttrDict):
   def __init__(self,*args,**kwargs):
@@ -14,6 +15,7 @@ class Manifest(AttrDict):
     elif isinstance(item,str):
       root = self
       while root._parent_: root = root._parent_
+      root._dict_['timestamp'] = int(strftime("%Y%m%d%H%M"))
       item = item%root._dict_
 
     return item

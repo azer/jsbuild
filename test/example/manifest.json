@@ -9,7 +9,7 @@
   "description":"Sample package for CommonJS. This package demonstrates the usage of JSBuild.",
   "build":{
     "dir":"lib",
-    "filename":"build/%(name)s-v%(vno)s%(timestamp)d.js",
+    "filename":"build/%(name)s-v%(vno)s%(vstage)s%(timestamp)d.js",
     "files":[
       "*.js",
       "foo/*.js",

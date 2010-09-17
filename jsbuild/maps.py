@@ -1,7 +1,7 @@
 from os.path import splitext
-from jsfile import JSFile
-from jsonindex import JSONIndex
-from yamlindex import YAMLIndex
+from jsbuild.jsfile import JSFile
+from jsbuild.jsonindex import JSONIndex
+from jsbuild.yamlindex import YAMLIndex
 
 types = {
   'script':JSFile,
