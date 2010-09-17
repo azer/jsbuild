@@ -26,12 +26,16 @@ class TestIndex(unittest.TestCase):
 
   def testDependencyContent(self):
     dps = self.index.dependencies
-    self.assertEqual( dps[0].src, 'example/lib/corge.js' )
-    self.assertEqual( dps[1].src, 'example/lib/foo/foo.js' )
-    self.assertEqual( dps[2].src, 'example/lib/bar/bar.js' )
-    self.assertEqual( dps[3].src, 'example/lib/bar/qux/eggs.js' )
-    self.assertEqual( dps[4].src, 'example/lib/bar/quux/spam.js' )
-    self.assertEqual( dps[5].src, 'example/lib/bar/quux/ham.js' )
+    self.assertEqual( dps[0].src, 'corge.js' )
+    self.assertEqual( dps[1].src, 'foo/foo.js' )
+    self.assertEqual( dps[2].src, 'bar/bar.js' )
+    self.assertEqual( dps[3].src, 'bar/qux/eggs.js' )
+    self.assertEqual( dps[4].src, 'bar/quux/spam.js' )
+    self.assertEqual( dps[5].src, 'bar/quux/ham.js' )
+
+  def testWorkingDir(self):
+    for dp in self.index.dependencies:
+      self.assertEqual(dp.working_dir,'example/lib')
 
 class TestJSONIndex(unittest.TestCase):
   def setUp(self):
