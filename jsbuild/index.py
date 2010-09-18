@@ -1,9 +1,11 @@
 from functools import partial
 from glob import glob
-from jsbuild.dependency import Dependency
-from jsbuild.manifest import Manifest
 from itertools import chain
+from jsbuild.dependency import Dependency
+from jsbuild.logging import logger
+from jsbuild.manifest import Manifest
 from jsbuild import templates
+import os.path
 import re
 
 class Index(Dependency):
@@ -38,6 +40,7 @@ class Index(Dependency):
     return self.manifest.build.__contains__(key) and self.manifest['build'][key] or default
 
   def import_manifest(self):
+    logger.debug('Importing manifest document')
     from jsbuild.maps import get_class_by_format
 
     dir_spec = self.get_config('dir',None)
@@ -57,5 +60,7 @@ class Index(Dependency):
     raise Exception('Not Implemented')
 
   def put(self):
-    with open('%s'%self.get_config('filename'),'w') as fl:
+    filename = self.get_config('filename') 
+    with open('%s'%filename,'w') as fl:
       fl.write(self.content)
+    logger.info('Writing %s OK'%filename)

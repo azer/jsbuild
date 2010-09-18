@@ -2,9 +2,7 @@ var %(name)s = (function(globals,undefined){
 
   var jsbuild = (function(){
 
-    var cache = {},
-      excinfo = new Error(),
-      workingDir = getDir( excinfo.fileName || excinfo.sourceURL );
+    var cache = {};
 
     function Module(){
       this.exports = null;
@@ -32,11 +30,11 @@ var %(name)s = (function(globals,undefined){
     };
 
     function getDir(path){
-      return path.replace(/\/?[^\/]+$/,"");
+      return path.replace(/\/?[^\/]*$/,"");
     }
 
     function getId(path){
-      var name = path.match(/\/([\w_-]+)\.js$/);
+      var name = path.match(/\/?([\w_-]+)\.js$/);
       name && ( name = name[1] );
       return name;
     };
@@ -86,15 +84,14 @@ var %(name)s = (function(globals,undefined){
       "getId":getId,
       "partial":partial,
       "resolvePath":resolvePath,
-      "require":require,
-      "workingDir":workingDir
+      "require":require
     };
 
   })();
 
   return {
     '_jsbuild_':jsbuild,
-    '_require_':jsbuild.partial(jsbuild.require,[''])
+    'require':jsbuild.partial(jsbuild.require,[''])
   };
 
 })(this); 

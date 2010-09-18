@@ -1,4 +1,5 @@
 from os.path import dirname
+from jsbuild.logging import logger
 
 class Dependency:
   def __init__(self,src=None,index=None):
@@ -7,6 +8,7 @@ class Dependency:
     self._workingDir_ = None
     self.index = index
     self.src = src
+    logger.info('Initialized new dependency "%s"'%src)
 
   @property
   def content(self):
@@ -32,5 +34,7 @@ class Dependency:
     self._workingDir_ = path
   
   def read(self):
-    with open('%s%s'%(self.index.working_dir+'/' if self.index and self.index.working_dir else '',self.src)) as fl:
+    path = "%s%s"%(self.index.working_dir+'/' if self.index and self.index.working_dir else '',self.src)
+    logger.debug("Trying to read file '%s'"%path)
+    with open(path) as fl:
       return fl.read()
