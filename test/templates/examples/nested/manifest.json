@@ -1,0 +1,19 @@
+{
+  "_dict_":{
+    "name":"nested",
+    "vno":"1.0",
+    "vstage":"rc"
+  },
+  "name":"%(name)s",
+  "version":"%(vno)s",
+  "description":"Sample package for CommonJS. This package demonstrates the usage of JSBuild.",
+  "build":{
+    "dir":"lib",
+    "filename":"build/%(name)s-v%(vno)s%(vstage)s%(timestamp)d.js",
+    "files":[
+      "*.js",
+      "foo/manifest.json",
+      "bar/manifest.json"
+    ]
+  }
+}

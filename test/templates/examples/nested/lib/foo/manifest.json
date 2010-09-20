@@ -1,0 +1,12 @@
+{
+  "name":"foo",
+  "version":"1.0",
+  "description":"Sample package for CommonJS. This package demonstrates the usage of JSBuild.",
+  "build":{
+    "dir":"lib",
+    "filename":"build/foo.js",
+    "files":[
+      "*.js"
+    ]
+  }
+}

@@ -13,6 +13,7 @@ import sys
 sys.path.append('%s/../'%dirname(__file__))
 
 from jsbuild.jsonindex import JSONIndex
+from jsbuild.logging import logger
 
 if sys.argv.count('--help'):
   print(USAGE)
@@ -20,7 +21,6 @@ if sys.argv.count('--help'):
 elif len(sys.argv)>1:
   index = JSONIndex()
   index.src = sys.argv[1]
-  index.import_manifest()
   index.put()
 else:
-  print('Missing manifest path.\nTry jsbuild --help for more information')
+  logger.error('Missing manifest path.\nTry jsbuild --help for more information')

@@ -4,6 +4,7 @@ from itertools import chain
 from jsbuild.dependency import Dependency
 from jsbuild.logging import logger
 from jsbuild.manifest import Manifest
+from jsbuild.maps import get_class_by_format
 from jsbuild import templates
 import os.path
 import re
@@ -13,7 +14,7 @@ class Index(Dependency):
     super(Index,self).__init__(*args,**kwargs)
     self._buffer_ = None
     self._manifest_ = None
-    self.dependencies = []
+    self._dependencies_ = None
 
   @property
   def buffer(self):
@@ -23,12 +24,24 @@ class Index(Dependency):
 
   @property
   def content(self):
-    content = templates.jspackage%{ "name":self.manifest.name, "content":'\n'.join( map( lambda dep: templates.jsmodule%{ "name":self.manifest.name, "filename":dep.src, 'content':dep.content }, self.dependencies) ) }
+    
+    root = self.index
+
+    content = templates.jspackage%{ 
+      "name":self.manifest.name, 
+      "content":'\n'.join( map( lambda dep: dep.content if not isinstance(dep,Index) or not dep.get_config('filename',False) else dep.put() or '', self.dependencies) )
+      }
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
 
     return content
+
+  @property
+  def dependencies(self):
+    if self._dependencies_ == None:
+      self.import_manifest()
+    return self._dependencies_
 
   @property
   def manifest(self):
@@ -41,12 +54,12 @@ class Index(Dependency):
 
   def import_manifest(self):
     logger.debug('Importing manifest document')
-    from jsbuild.maps import get_class_by_format
 
-    dir_spec = self.get_config('dir',None)
-    if dir_spec: self.working_dir = (self.working_dir + '/' if self.working_dir else '') + ( dirname(dir_spec) if re.findall('\/$',dir_spec) else dir_spec )
+    self._dependencies_ = []
 
-    files = [ el for el in map(partial(lambda index, path: (index.working_dir and index.working_dir+'/' or '')+path,self),self.get_config('files',[])) ]
+    wd = os.path.normpath(os.path.join(self.working_dir,self.get_config('dir','')))
+
+    files = [ el for el in map(partial(lambda index,path: os.path.join(wd,path),self),self.get_config('files',[])) ]
 
     for depinfo in chain(*map(glob,files)):
       src = None
@@ -60,7 +73,7 @@ class Index(Dependency):
     raise Exception('Not Implemented')
 
   def put(self):
-    filename = self.get_config('filename') 
+    filename = ( self.working_dir + '/' if self.working_dir else '' ) + self.get_config('filename') 
     with open('%s'%filename,'w') as fl:
       fl.write(self.content)
     logger.info('Writing %s OK'%filename)

@@ -7,6 +7,11 @@ class Manifest(AttrDict):
     self._buffer_ = None 
     self._parent_ = None
 
+    if not self.__contains__('_dict_'):
+      self['_dict_'] = {}
+    
+    self['_dict_']['timestamp'] = int(strftime("%Y%m%d%H%M"))
+
   def __getitem__(self,name):
     item = super(Manifest,self).__getitem__(name)
 
@@ -15,7 +20,6 @@ class Manifest(AttrDict):
     elif isinstance(item,str):
       root = self
       while root._parent_: root = root._parent_
-      root._dict_['timestamp'] = int(strftime("%Y%m%d%H%M"))
       item = item%root._dict_
 
     return item
