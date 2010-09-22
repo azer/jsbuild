@@ -2,14 +2,14 @@
   "_dict_":{
     "name":"example",
     "vno":"1.0",
-    "vstage":"rc"
+    "vstage":"3"
   },
   "name":"%(name)s",
   "version":"%(vno)s",
   "description":"Sample package for CommonJS. This package demonstrates the usage of JSBuild.",
   "build":{
     "dir":"lib",
-    "filename":"build/%(name)s-v%(vno)s%(vstage)s%(timestamp)d.js",
+    "filename":"build/%(name)s-v%(vno)s%(vstage)s.js",
     "files":[
       "*.js",
       "foo/*.js",

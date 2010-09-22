@@ -2,7 +2,7 @@
 import unittest
 import sys
 sys.path.append('../../')
-sys.path.pop(0)
+
 
 from jsbuild.dependency import Dependency
 
@@ -24,8 +24,7 @@ class TestDependency(unittest.TestCase):
     self.assertEqual(self.dp.working_dir, 'qux/foo')
 
   def testRead(self):
-    self.dp.filename = 'dependency.py'
-    self.dp.working_dir = '../../test/lib'
+    self.dp.src = 'dependency.py'
     self.assertTrue(self.dp.read().find("self.assertTrue")>-1)
 
 if __name__ == '__main__':

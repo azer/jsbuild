@@ -1,10 +1,14 @@
 {
-  "name":"bar",
-  "version":"1.0",
+  "_dict_":{
+    "name":"bar",
+    "vno":"1.0",
+    "vstage":"3"
+  },
+  "name":"%(name)s",
+  "version":"%(vno)s",
   "description":"Sample package for CommonJS. This package demonstrates the usage of JSBuild.",
   "build":{
-    "dir":"lib",
-    "filename":"build/bar.js",
+    "filename":"../../build/bar/%(name)s-v%(vno)s%(vstage)s.js",
     "files":[
       "*.js",
       "qux/*.js",

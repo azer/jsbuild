@@ -24,13 +24,14 @@ class Index(Dependency):
 
   @property
   def content(self):
-    
-    root = self.index
 
-    content = templates.jspackage%{ 
-      "name":self.manifest.name, 
-      "content":'\n'.join( map( lambda dep: dep.content if not isinstance(dep,Index) or not dep.get_config('filename',False) else dep.put() or '', self.dependencies) )
-      }
+    root = self
+    while root.index: root = root.index
+    name = root.manifest.name
+
+    content = '\n'.join(map(lambda dep: dep.content if not isinstance(dep,Index) or not dep.get_config('filename',False) else dep.put() or '', self.dependencies))
+
+    if not self.index: content = templates.jspackage%{ "name":name, "content":content }
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
@@ -52,28 +53,29 @@ class Index(Dependency):
   def get_config(self,key,default=None):
     return self.manifest.build.__contains__(key) and self.manifest['build'][key] or default
 
+  @property
+  def source_dir(self):
+    return os.path.normpath(os.path.join(self.working_dir,self.get_config('dir','')))
+
   def import_manifest(self):
     logger.debug('Importing manifest document')
 
     self._dependencies_ = []
+    sdir = self.source_dir
 
-    wd = os.path.normpath(os.path.join(self.working_dir,self.get_config('dir','')))
-
-    files = [ el for el in map(partial(lambda index,path: os.path.join(wd,path),self),self.get_config('files',[])) ]
+    files = [ el for el in map(partial(lambda path: os.path.join(sdir,path)),self.get_config('files',[])) ]
 
     for depinfo in chain(*map(glob,files)):
-      src = None
-      cls = None
-      src = depinfo
-      cls = get_class_by_format(src)
-      if self.working_dir: src = src[len(self.working_dir)+1:]
-      self.dependencies.append(cls(src=src,index=self))
+      src = depinfo if not self.source_dir else depinfo[len(self.source_dir)+1:]
+      dp = get_class_by_format(src)(index=self)
+      dp.src = src
+      self.dependencies.append(dp)
 
   def parse(self,content):
     raise Exception('Not Implemented')
 
   def put(self):
-    filename = ( self.working_dir + '/' if self.working_dir else '' ) + self.get_config('filename') 
+    filename = os.path.normpath(os.path.join(self.working_dir, self.get_config('filename')))
     with open('%s'%filename,'w') as fl:
       fl.write(self.content)
     logger.info('Writing %s OK'%filename)

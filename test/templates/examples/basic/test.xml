@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="../../testrunner.xsl"?>
 <test name='jsbuild-templates' path='../../test.js'>
-  <dependency path='build/example-v1.0rc201009190832.js' />
+  <dependency path='build/example-v1.0rc201009211116.js' />
 </test>
