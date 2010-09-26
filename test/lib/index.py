@@ -49,13 +49,207 @@ class TestIndex(unittest.TestCase):
     self.assertEqual( dps[1].working_dir, '../templates/examples/basic/lib/foo' )
     self.assertEqual( dps[2].working_dir, '../templates/examples/basic/lib/bar' )
 
-
-  def testPathDefinitions(self):
+  def testPathResolve(self):
     paths = re.findall('defineModule\("([^"]+)"',self.index.content)
     self.assertEqual( paths[0], 'corge.js')
     self.assertEqual( paths[1], 'foo/foo.js')
     self.assertEqual( paths[2], 'bar/bar.js')
 
+class LayoutTests(unittest.TestCase):
+  def setUp(self):
+    self.root = Index()
+    self.root._dependencies_ = []
+
+    self.corge = JSFile()
+    self.corge.index = self.root
+    self.corge.src = 'corge.js'
+    setattr(self.corge, 'read', lambda *args: 'alert("corge says hello")')
+    self.root.dependencies.append(self.corge)
+    
+    self.foo = Index()
+    self.foo._dependencies_ = []
+    self.foo.index = self.root
+    self.root.dependencies.append(self.foo)
+
+    self.qux = JSFile()
+    self.qux.index = self.foo
+    self.qux.src = 'qux.js'
+    setattr(self.qux, 'read', lambda *args: 'alert("qux says hello")')
+    self.foo.dependencies.append(self.qux)
+
+    self.bar = Index()
+    self.bar.index = self.root
+    self.bar._dependencies_ = []
+    self.root.dependencies.append(self.bar)
+
+    self.quux = JSFile()
+    self.quux.index = self.bar
+    self.quux.src = 'quux.js'
+    setattr(self.quux, 'read', lambda *args: 'alert("quux says hello")')
+    self.bar.dependencies.append(self.quux)
+
+    self.baz = Index()
+    self.baz.index = self.bar
+    self.baz._dependencies_ = []
+    self.bar.dependencies.append(self.baz)
+
+    self.spam = JSFile()
+    self.spam.index = self.baz
+    self.spam.src = 'grault/spam.js'
+    setattr(self.spam, 'read', lambda *args: 'alert("spam says hello")')
+    self.baz.dependencies.append(self.spam)
+
+    self.eggs = JSFile()
+    self.eggs.index = self.baz
+    self.eggs.src = 'grault/eggs.js'
+    setattr(self.eggs, 'read', lambda *args: 'alert("eggs says hello")')
+    self.baz.dependencies.append(self.eggs)
+
+  def testPackageTree(self):
+    self.root.src = '/home/azer/newproject/manifest.json'
+    self.root._manifest_ = Manifest({
+      'name':'root',
+      'build':{
+         'dir':'lib',
+         'filename':'/tmp/jsb_test_build',
+         'files':[
+            'foo/manifest.json',
+            'bar/manifest.json'
+          ]
+       }
+    })
+
+    self.foo.src = 'foo/manifest.json'
+    self.foo._manifest_ = Manifest({
+      'name':'foo',
+      'build':{
+        'dir':'lib'
+      }
+    })
+
+    self.bar.src = 'bar/manifest.json'
+    self.bar._manifest_ = Manifest({
+      'name':'bar',
+      'build':{
+         'dir':'lib'
+       }
+    })
+
+    self.baz.src = 'baz/manifest.json'
+    self.baz._manifest_ = Manifest({
+      'name':'baz',
+      'build':{
+         'dir':'lib'
+       }
+    })
+
+    paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    self.assertEqual( paths[0], 'corge.js')
+    self.assertEqual( paths[1], 'foo/qux.js')
+    self.assertEqual( paths[2], 'bar/quux.js')
+    self.assertEqual( paths[3], 'bar/baz/grault/spam.js')
+    self.assertEqual( paths[4], 'bar/baz/grault/eggs.js')
+
+  def testGatheredTree(self):
+    self.root.src = '/home/azer/newproject/build/manifests/root.json'
+    self.root._manifest_ = Manifest({
+      'name':'root',
+      'build':{
+         'dir':'../../src/lib',
+         'filename':'/tmp/jsb_test_build',
+         'files':[
+            '../../build/manifests/foo.json',
+            '../../build/manifests/bar.json'
+          ]
+       }
+    })
+
+    self.foo.src = '../../build/manifests/foo.json'
+    self.foo._manifest_ = Manifest({
+      'name':'foo',
+      'build':{
+        'dir':'../../src/lib/foo'
+      }
+    })
+
+    self.bar.src = '../../build/manifests/bar.json'
+    self.bar._manifest_ = Manifest({
+      'name':'bar',
+      'build':{
+        'dir':'../../src/lib/bar'
+       }
+    })
+
+    self.baz.src = '../../../build/manifests/baz.json'
+    self.baz._manifest_ = Manifest({
+      'name':'baz',
+      'build':{
+        'dir':'../../src/lib/bar/baz'
+       }
+    })
+
+    paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    self.assertEqual( paths[0], 'corge.js')
+    self.assertEqual( paths[1], 'foo/qux.js')
+    self.assertEqual( paths[2], 'bar/quux.js')
+    self.assertEqual( paths[3], 'bar/baz/grault/spam.js')
+    self.assertEqual( paths[4], 'bar/baz/grault/eggs.js')
+
+  def testSplittedManifests(self):
+    self.root.src = '/home/azer/newproject/manifests/root.json'
+    self.root._manifest_ = Manifest({
+      'name':'root',
+      'build':{
+         'dir':'../src/lib',
+         'filename':'/tmp/jsb_test_build',
+         'files':[
+            '../manifests/foo.json',
+            '../manifests/bar.json'
+          ]
+       }
+    })
+
+    self.foo.src = 'foo/manifest.json'
+    self.foo._manifest_ = Manifest({
+      'name':'foo',
+      'build':{
+        'filename':'/tmp/jsb_test_build_foo',
+        'dir':'lib'
+      }
+    })
+
+    self.bar.src = 'bar/manifest.json'
+    self.bar._manifest_ = Manifest({
+      'name':'bar',
+      'build':{
+        'filename':'/tmp/jsb_test_build_bar',
+         'dir':'lib'
+       }
+    })
+
+    self.baz.src = 'baz/manifest.json'
+    self.baz._manifest_ = Manifest({
+      'name':'baz',
+      'build':{
+         'dir':'lib'
+       }
+    })
+
+    paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    self.assertEqual( len(paths), 1)
+    self.assertEqual( paths[0], 'corge.js')
+
+    paths = re.findall('defineModule\("([^"]+)"',self.foo.content)
+    self.assertEqual( len(paths), 1)
+    self.assertEqual( paths[0], 'foo/qux.js')
+
+    paths = re.findall('defineModule\("([^"]+)"',self.bar.content)
+    self.assertEqual( len(paths), 3)
+    self.assertEqual( paths[0], 'bar/quux.js')
+    self.assertEqual( paths[1], 'bar/baz/grault/spam.js')
+    self.assertEqual( paths[2], 'bar/baz/grault/eggs.js')    
+  
+    
 class TestJSONIndex(unittest.TestCase):
   def setUp(self):
     self.index = JSONIndex()
@@ -88,7 +282,7 @@ class TestJSONIndex(unittest.TestCase):
     self.assertEqual( dps[1].dependencies[0].working_dir, '../templates/examples/nested/lib/foo')
     self.assertEqual( dps[2].working_dir, '../templates/examples/nested/lib/bar' )
 
-  def testNestedPathDefinitions(self):
+  def testNestedManifests(self):
     self.index.src = '../templates/examples/nested/manifest.json'
 
     paths = re.findall('defineModule\("([^"]+)"',self.index.content)

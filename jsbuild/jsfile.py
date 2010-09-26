@@ -9,20 +9,25 @@ class JSFile(Dependency):
   def content(self):
     parents = []
     root = self
-
+  
     while root.index:
       root = root.index
-      parents.append(root)
+      parents.insert(0,root)
 
-    wdir = ''
-    sdir = None
+    logger.debug('Resolving module path of "%s"'%self.filename)
+    wd = ''
     for index in parents:
-      prefix = index.index.get_config( 'dir', None ) if index.index else index.working_dir
-      dirname = os.path.dirname( index.src ) if index.index else os.path.dirname( self.src )
-      print('index.src:',index.src,'index.source_dir:',index.source_dir,'wdir:',wdir,'dirname:',dirname,'prefix:',prefix,'find:',dirname.find(prefix))
-      wdir = os.path.join(wdir, dirname if not prefix or dirname.find(prefix) == -1 else dirname[len(prefix)+1:] )
+      if not index.index: continue
+      print( 'Diving in to one more level', '[self.src]',self.src, '[self.working_dir]',self.working_dir, '[index.working_dir]', index.working_dir, '[index.source_dir]', index.source_dir )
 
-    filename = os.path.normpath(os.path.join(wdir,self.filename))
+      sdir = index.source_dir
+      prelen = len(index.index.source_dir)
+      suflen = len(index.get_config('dir',''))
+      reldir = sdir[prelen+1 if prelen else 0: suflen*-1 if suflen and suflen<len(sdir)-prelen else None ]
+
+      wd = os.path.normpath( os.path.join( wd, reldir) )
+      
+    filename = os.path.normpath( os.path.join(wd, self.src) )
 
     return jsmodule%{
       "name":root.manifest.name,

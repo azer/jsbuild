@@ -5,11 +5,11 @@ files = ['templates/*']
 
 setup(name='JSBuild',
     version=".".join( map(str, jsbuild.__version__) ),
-    description='Javascript Build Utility With CommonJS Packages Support',
+    description='',
     license='MIT',
     author=jsbuild.__author__,
     author_email=jsbuild.__email__,
-    url='http://github.com/jsbuild',
+    url='http://github.com/azer/jsbuild',
     packages=['jsbuild'],
     package_data = {'jsbuild' : files },
     scripts=['scripts/jsbuild'],
