@@ -87,3 +87,12 @@ var test_moduleDefinition = function(test){
   });
   example.require('./new/module')
 }
+
+var test_contextCache = function(test){
+  example._jsbuild_.defineModule('spam/eggs.js',function(exports,module,require){
+    exports.foo = {};
+  });
+  example.require('./spam/eggs').foo.bar = 314;
+  compare( example.require('./spam/eggs').foo.bar, 314);
+  test.callback();
+}

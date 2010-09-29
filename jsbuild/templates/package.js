@@ -14,7 +14,7 @@ var %(name)s = (function(globals,undefined){
 
     Module.prototype.call = function(){
       this.exports = {};
-      return this.wrapper.call(this, this.exports, this, partial(require, [ this.workingDir ], null));
+      return this.wrapper.call(null, this.exports, this, partial(require, [ this.workingDir ], null));
     };
 
     function defineModule(path,modwrapper){
