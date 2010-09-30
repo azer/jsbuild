@@ -55,6 +55,10 @@ class TestIndex(unittest.TestCase):
     self.assertEqual( paths[1], 'foo/foo.js')
     self.assertEqual( paths[2], 'bar/bar.js')
 
+  def testAutorun(self):
+    self.index._manifest_['build']['main'] = 'corge.js'
+    self.assertTrue( self.index.content.find( '._jsbuild_.getModuleByFilename("corge.js").call()' ) > -1 )
+
 class LayoutTests(unittest.TestCase):
   def setUp(self):
     self.root = Index()
@@ -105,6 +109,8 @@ class LayoutTests(unittest.TestCase):
     setattr(self.eggs, 'read', lambda *args: 'alert("eggs says hello")')
     self.baz.dependencies.append(self.eggs)
 
+    
+
   def testPackageTree(self):
     self.root.src = '/home/azer/newproject/manifest.json'
     self.root._manifest_ = Manifest({
@@ -112,6 +118,7 @@ class LayoutTests(unittest.TestCase):
       'build':{
          'dir':'lib',
          'filename':'/tmp/jsb_test_build',
+         'main':'corge.js',
          'files':[
             'foo/manifest.json',
             'bar/manifest.json'
@@ -123,6 +130,7 @@ class LayoutTests(unittest.TestCase):
     self.foo._manifest_ = Manifest({
       'name':'foo',
       'build':{
+        'main':'qux.js',
         'dir':'lib'
       }
     })
@@ -131,6 +139,7 @@ class LayoutTests(unittest.TestCase):
     self.bar._manifest_ = Manifest({
       'name':'bar',
       'build':{
+         'main':'quux.js',
          'dir':'lib'
        }
     })
@@ -139,16 +148,24 @@ class LayoutTests(unittest.TestCase):
     self.baz._manifest_ = Manifest({
       'name':'baz',
       'build':{
+         'main':'grault/eggs.js',
          'dir':'lib'
        }
     })
 
-    paths = re.findall('defineModule\("([^"]+)"',self.root.content)
-    self.assertEqual( paths[0], 'corge.js')
-    self.assertEqual( paths[1], 'foo/qux.js')
-    self.assertEqual( paths[2], 'bar/quux.js')
-    self.assertEqual( paths[3], 'bar/baz/grault/spam.js')
-    self.assertEqual( paths[4], 'bar/baz/grault/eggs.js')
+    module_paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    self.assertEqual( module_paths[0], 'corge.js')
+    self.assertEqual( module_paths[1], 'foo/qux.js')
+    self.assertEqual( module_paths[2], 'bar/quux.js')
+    self.assertEqual( module_paths[3], 'bar/baz/grault/spam.js')
+    self.assertEqual( module_paths[4], 'bar/baz/grault/eggs.js')
+
+    autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.root.content)
+    self.assertEqual( len(autorun_paths), 4 )
+    self.assertEqual( autorun_paths[0], 'corge.js')
+    self.assertEqual( autorun_paths[1], 'foo/qux.js')
+    self.assertEqual( autorun_paths[2], 'bar/quux.js')
+    self.assertEqual( autorun_paths[3], 'bar/baz/grault/eggs.js')    
 
   def testGatheredTree(self):
     self.root.src = '/home/azer/newproject/build/manifests/root.json'
@@ -157,6 +174,7 @@ class LayoutTests(unittest.TestCase):
       'build':{
          'dir':'../../src/lib',
          'filename':'/tmp/jsb_test_build',
+         'main':'corge.js',
          'files':[
             '../../build/manifests/foo.json',
             '../../build/manifests/bar.json'
@@ -168,6 +186,7 @@ class LayoutTests(unittest.TestCase):
     self.foo._manifest_ = Manifest({
       'name':'foo',
       'build':{
+        'main':'qux.js',
         'dir':'../../src/lib/foo'
       }
     })
@@ -176,6 +195,7 @@ class LayoutTests(unittest.TestCase):
     self.bar._manifest_ = Manifest({
       'name':'bar',
       'build':{
+        'main':'quux.js',
         'dir':'../../src/lib/bar'
        }
     })
@@ -184,6 +204,7 @@ class LayoutTests(unittest.TestCase):
     self.baz._manifest_ = Manifest({
       'name':'baz',
       'build':{
+        'main':'grault/eggs.js',
         'dir':'../../src/lib/bar/baz'
        }
     })
@@ -195,6 +216,13 @@ class LayoutTests(unittest.TestCase):
     self.assertEqual( paths[3], 'bar/baz/grault/spam.js')
     self.assertEqual( paths[4], 'bar/baz/grault/eggs.js')
 
+    autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.root.content)
+    self.assertEqual( len(autorun_paths), 4 )
+    self.assertEqual( autorun_paths[0], 'corge.js')
+    self.assertEqual( autorun_paths[1], 'foo/qux.js')
+    self.assertEqual( autorun_paths[2], 'bar/quux.js')
+    self.assertEqual( autorun_paths[3], 'bar/baz/grault/eggs.js')    
+
   def testSplittedManifests(self):
     self.root.src = '/home/azer/newproject/manifests/root.json'
     self.root._manifest_ = Manifest({
@@ -202,6 +230,7 @@ class LayoutTests(unittest.TestCase):
       'build':{
          'dir':'../src/lib',
          'filename':'/tmp/jsb_test_build',
+         'main':'corge.js',
          'files':[
             '../manifests/foo.json',
             '../manifests/bar.json'
@@ -214,7 +243,8 @@ class LayoutTests(unittest.TestCase):
       'name':'foo',
       'build':{
         'filename':'/tmp/jsb_test_build_foo',
-        'dir':'lib'
+        'dir':'lib',
+        'main':'qux.js'
       }
     })
 
@@ -223,7 +253,8 @@ class LayoutTests(unittest.TestCase):
       'name':'bar',
       'build':{
         'filename':'/tmp/jsb_test_build_bar',
-         'dir':'lib'
+        'dir':'lib',
+        'main':'quux.js'
        }
     })
 
@@ -231,7 +262,8 @@ class LayoutTests(unittest.TestCase):
     self.baz._manifest_ = Manifest({
       'name':'baz',
       'build':{
-         'dir':'lib'
+         'dir':'lib',
+         'main':'grault/eggs.js'
        }
     })
 
@@ -239,16 +271,28 @@ class LayoutTests(unittest.TestCase):
     self.assertEqual( len(paths), 1)
     self.assertEqual( paths[0], 'corge.js')
 
+    autorun_path = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.root.content)
+    self.assertEqual( len(autorun_path), 1 )
+    self.assertEqual( autorun_path[0], 'corge.js')
+
     paths = re.findall('defineModule\("([^"]+)"',self.foo.content)
     self.assertEqual( len(paths), 1)
     self.assertEqual( paths[0], 'foo/qux.js')
+
+    autorun_path = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.foo.content)
+    self.assertEqual( len(autorun_path), 1 )
+    self.assertEqual( autorun_path[0], 'foo/qux.js')
 
     paths = re.findall('defineModule\("([^"]+)"',self.bar.content)
     self.assertEqual( len(paths), 3)
     self.assertEqual( paths[0], 'bar/quux.js')
     self.assertEqual( paths[1], 'bar/baz/grault/spam.js')
     self.assertEqual( paths[2], 'bar/baz/grault/eggs.js')    
-  
+
+    autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.bar.content)
+    self.assertEqual( len(autorun_paths), 2 )
+    self.assertEqual( autorun_paths[0], 'bar/quux.js')
+    self.assertEqual( autorun_paths[1], 'bar/baz/grault/eggs.js')
     
 class TestJSONIndex(unittest.TestCase):
   def setUp(self):
@@ -281,21 +325,6 @@ class TestJSONIndex(unittest.TestCase):
     self.assertEqual( dps[1].dependencies[0].filename, 'foo.js')
     self.assertEqual( dps[1].dependencies[0].working_dir, '../templates/examples/nested/lib/foo')
     self.assertEqual( dps[2].working_dir, '../templates/examples/nested/lib/bar' )
-
-  def testNestedManifests(self):
-    self.index.src = '../templates/examples/nested/manifest.json'
-
-    paths = re.findall('defineModule\("([^"]+)"',self.index.content)
-    self.assertEqual( paths[0], 'corge.js')
-
-    paths = re.findall('defineModule\("([^"]+)"',self.index.dependencies[1].content)
-    self.assertEqual( paths[0], 'foo/foo.js')
-
-    paths = re.findall('defineModule\("([^"]+)"',self.index.dependencies[2].content)
-    self.assertEqual( paths[0], 'bar/bar.js')
-    self.assertEqual( paths[1], 'bar/qux/eggs.js')
-    self.assertEqual( paths[2], 'bar/quux/spam.js')
-    self.assertEqual( paths[3], 'bar/quux/ham.js')
 
 if __name__ == '__main__':
   unittest.main()

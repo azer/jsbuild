@@ -15,6 +15,7 @@ class Index(Dependency):
     self._buffer_ = None
     self._manifest_ = None
     self._dependencies_ = None
+    self.to_run = []
 
   @property
   def buffer(self):
@@ -32,6 +33,9 @@ class Index(Dependency):
     content = '\n'.join(map(lambda dep: dep.content if not isinstance(dep,Index) or not dep.get_config('filename',False) else dep.put() or '', self.dependencies))
 
     if not self.index: content = templates.jspackage%{ "name":name, "content":content }
+
+    for flname in self.to_run:
+      content = '%s\n%s'%(content,templates.jsautorun%{ "index_name":self.manifest.name, "filename":flname})
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)

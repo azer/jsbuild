@@ -1,7 +1,7 @@
 from jsbuild.dependency import Dependency
-from jsbuild.templates import jsmodule
 from jsbuild.maps import FORMATS
 from jsbuild.logging import logger
+from jsbuild import templates
 import os.path
 
 class JSFile(Dependency):
@@ -18,7 +18,7 @@ class JSFile(Dependency):
     wd = ''
     for index in parents:
       if not index.index: continue
-      print( 'Diving in to one more level', '[self.src]',self.src, '[self.working_dir]',self.working_dir, '[index.working_dir]', index.working_dir, '[index.source_dir]', index.source_dir )
+      # print( 'Diving in to one more level', '[self.src]',self.src, '[self.working_dir]',self.working_dir, '[index.working_dir]', index.working_dir, '[index.source_dir]', index.source_dir )
 
       sdir = index.source_dir
       prelen = len(index.index.source_dir)
@@ -29,11 +29,17 @@ class JSFile(Dependency):
       
     filename = os.path.normpath( os.path.join(wd, self.src) )
 
-    return jsmodule%{
+    template = templates.jsmodule%{
       "name":root.manifest.name,
       "filename":filename,
       "content":super(JSFile,self).content
       }
+
+    if self.index.get_config('main',None) == self.src:
+      root.to_run.append( filename )
+      #template = '%s\n%s'%(template,templates.jsautorun%{ 'index_name':root.manifest.name, 'filename':filename })
+
+    return template
 
 FORMATS['js'] = JSFile
 logger.info('Associated JSFile class with "js" extension')

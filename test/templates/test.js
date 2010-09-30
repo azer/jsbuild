@@ -15,6 +15,7 @@ var test_api = function(test){
   assert( example._jsbuild_.partial );
   assert( example._jsbuild_.resolvePath );
   assert( example._jsbuild_.require );
+  assert( example._jsbuild_.getModuleByFilename );
   assert( example.require );
   test.callback();
 }
@@ -26,6 +27,11 @@ var test_cache = function(test){
     var filename = modules[i];
     compare( cache[filename].fileName, filename); 
   };
+  test.callback();
+}
+
+var test_getModuleByFilename = function(test){
+  compare( example._jsbuild_.getModuleByFilename('corge.js'), example._jsbuild_.cache['corge.js'] );
   test.callback();
 }
 
@@ -94,5 +100,10 @@ var test_contextCache = function(test){
   });
   example.require('./spam/eggs').foo.bar = 314;
   compare( example.require('./spam/eggs').foo.bar, 314);
+  test.callback();
+}
+
+var test_autoload = function(test){
+  compare(example.rnd, example.require('./corge').rnd);
   test.callback();
 }

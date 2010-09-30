@@ -10,6 +10,7 @@
   "build":{
     "dir":"lib",
     "filename":"build/%(name)s-v%(vno)s%(vstage)s.js",
+    "main":"corge.js",
     "files":[
       "*.js",
       "foo/*.js",

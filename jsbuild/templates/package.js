@@ -14,7 +14,7 @@ var %(name)s = (function(globals,undefined){
 
     Module.prototype.call = function(){
       this.exports = {};
-      return this.wrapper.call(null, this.exports, this, partial(require, [ this.workingDir ], null));
+      return this.wrapper.call(null, this.exports, this, partial(require, [ this.workingDir ], null), globals);
     };
 
     function defineModule(path,modwrapper){
@@ -38,6 +38,10 @@ var %(name)s = (function(globals,undefined){
       name && ( name = name[1] );
       return name;
     };
+
+    function getModuleByFilename(filename){
+      return cache[filename];
+    }
 
     function partial(fn,init_args,scope){
       !init_args && ( init_args = [] );
@@ -82,6 +86,7 @@ var %(name)s = (function(globals,undefined){
       "defineModule":defineModule,
       "getDir":getDir,
       "getId":getId,
+      "getModuleByFilename":getModuleByFilename,
       "partial":partial,
       "resolvePath":resolvePath,
       "require":require
