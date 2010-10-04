@@ -22,7 +22,7 @@ optparser.add_option("-q", "--quiet",  action="store_true", dest="quiet", defaul
 logging_level = 100 if options.quiet else ( 10 if options.debug else 20 )
 logging.logger.setLevel(logging_level)
 
-if not args: logger.error('Missing manifest path. More info with "-h"') 
+if not args: logging.logger.error('Missing manifest path. More info with "-h"') 
 
 for filename in args:
   logging.logger.debug('Build the manifest at "%s"'%filename)

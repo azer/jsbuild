@@ -43,7 +43,6 @@ Now you should be able to call _jsbuild_ command which merges the Javascript
 files defined in the specified manifest file. You may run this command without
 any parameter to test your installation, it should raise an output like this:
   
-  ERROR - Missing manifest path.
-  Try jsbuild --help for more information
+  ERROR - Missing manifest path. More info with "-h" 
 
 vim: tw=100
