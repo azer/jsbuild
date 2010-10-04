@@ -5,7 +5,7 @@ files = ['templates/*']
 
 setup(name='JSBuild',
     version=".".join( map(str, jsbuild.__version__) ),
-    description='',
+    description='JSBuild is a command-line build utility that provides using CommonJS modules on web',
     license='MIT',
     author=jsbuild.__author__,
     author_email=jsbuild.__email__,
