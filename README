@@ -1,32 +1,26 @@
 Overview
 --------
-JSBuild is a new command-line build utility that provides using CommonJS
-modules on web apps without any need of source code modification, works
-unobtrusive and supports packages specification as well.
+JSBuild is a command-line build utility that provides using CommonJS modules on web without any need
+of source code modification, works unobtrusive and supports packages specification as well.
 
 How It Works
 ------------
-JSBuild consists of a library and a runtime script written in Python. After
-installation,  the _jsbuild_ command will let you to merge your CommonJS
-modules which are defined in a manifest document, to just one javascript file
-ready to be run on web browsers.
+JSBuild consists of a library and a runtime script written in Python. After installation,  the
+_jsbuild_ command will let you to merge your CommonJS modules which are defined in a manifest
+document, to just one javascript file ready to be run on web browsers.
 
-The idea behind JSBuild is to generate wrapper forms which are similar to the
-module patterns being consistently used by the folk in these days. In the other
-words, JSBuild offers a better module pattern which is compatible with
-link:http://wiki.commonjs.org/wiki/Modules[Modules] and
-link:http://wiki.commonjs.org/wiki/Packages[Packages] specifications of
-CommonJS. 
+The idea behind JSBuild is to generate wrapper forms which are similar to the module patterns being
+consistently used by the folk in these days. In the other words, JSBuild offers a better module
+pattern which is compatible with link:http://wiki.commonjs.org/wiki/Modules[Modules] and
+link:http://wiki.commonjs.org/wiki/Packages[Packages] specifications of CommonJS. 
 
-JSBuild works synchronous to support CommonJS with no exception but supports
-also nested manifest files and splitting the build file in many pieces which
-makes possible to load asynchronously any part of the built source code when
-it's needed. I've been also working on the
-link:http://github.com/azer/domloader[DOMLoader] project that provides loading
-DOM dependencies like Javascript, CSS files asynchronously. In conclusion, I
-think it's better to build source codes in pieces and load those when they are
-needed, asynchronously. This way lets us to take advantage of using CommonJS'
-synchronous module specification, as well.
+JSBuild works synchronous to support CommonJS with no exception but supports also nested manifest
+files and splitting the build file in many pieces which makes possible to load asynchronously any
+part of the built source code when it's needed. I've been also working on the
+link:http://github.com/azer/domloader[DOMLoader] project that provides loading DOM dependencies like
+Javascript, CSS files asynchronously. In conclusion, I think it's better to build source codes in
+pieces and load those when they are needed, asynchronously. This way lets us to take advantage of
+using CommonJS' synchronous module specification, as well.
 
 Download and Install
 --------------------
@@ -39,9 +33,9 @@ To Install:
   $ cd jsbuild
   $ python3 setup.py install
 
-Now you should be able to call _jsbuild_ command which merges the Javascript
-files defined in the specified manifest file. You may run this command without
-any parameter to test your installation, it should raise an output like this:
+Now you should be able to call _jsbuild_ command which merges the Javascript files defined in the
+specified manifest file. You may run this command without any parameter to test your installation,
+it should raise an output like this:
   
   ERROR - Missing manifest path. More info with "-h" 
 
