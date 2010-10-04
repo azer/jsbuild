@@ -9,8 +9,6 @@ class Dependency:
 
     if src: self.src = src
 
-    logger.info('Initialized new dependency "%s"'%src)
-
   @property
   def content(self):
     if not self._content_:

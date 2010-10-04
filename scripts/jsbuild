@@ -6,21 +6,27 @@ __version__ = "1.0a"
 __email__ = "azer@kodfabrik.com"
 __status__ = "Development"
 
-USAGE = 'Usage: jsbuild [manifest]'
-
 from os.path import dirname
+from optparse import OptionParser
 import sys
 sys.path.append('%s/../'%dirname(__file__))
 
-from jsbuild.jsonindex import JSONIndex
-from jsbuild.logging import logger
+from jsbuild import logging
+from jsbuild.maps import get_class_by_format
 
-if sys.argv.count('--help'):
-  print(USAGE)
-  exit()
-elif len(sys.argv)>1:
-  index = JSONIndex()
-  index.src = sys.argv[1]
-  index.put()
-else:
-  logger.error('Missing manifest path.\nTry jsbuild --help for more information')
+optparser = OptionParser(usage='jsbuild [option-or-filename]...',version=__version__)
+optparser.add_option("-d", "--debug", action="store_true", dest="debug", default=False, help="display debug logs")
+optparser.add_option("-q", "--quiet",  action="store_true", dest="quiet", default=False, help="don't print logging messages to stdout")
+(options, args) = optparser.parse_args()
+
+logging_level = 100 if options.quiet else ( 10 if options.debug else 20 )
+logging.logger.setLevel(logging_level)
+
+if not args: logger.error('Missing manifest path. More info with "-h"') 
+
+for filename in args:
+  logging.logger.debug('Build the manifest at "%s"'%filename)
+  index = get_class_by_format(filename)()
+  index.src = filename
+
+  index.put() if index.get_config('filename',None) else print(index.content)
