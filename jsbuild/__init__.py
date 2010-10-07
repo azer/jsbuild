@@ -1,4 +1,4 @@
-__author__ = "E. Azer Koçulu"
+__author__ = "E. Azer Koculu"
 __copyright__ = "Copyright 2010, Kodfabrik"
 __license__ = "MIT"
 __version__ = "1.0a"

@@ -14,7 +14,6 @@ setup(name='JSBuild',
     package_data = {'jsbuild' : files },
     scripts=['scripts/jsbuild'],
     classifiers=[
-      'Development Status :: 1 - Alpha',
       'Environment :: Console',
       'Intended Audience :: Developers',
       'Intended Audience :: System Administrators',
@@ -23,6 +22,6 @@ setup(name='JSBuild',
       'Operating System :: Microsoft :: Windows',
       'Operating System :: POSIX',
       'Programming Language :: Python',
-      'Topic :: Software Development :: Building'
+      'Topic :: Software Development'
       ],
 )
