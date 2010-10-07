@@ -35,9 +35,9 @@ class JSFile(Dependency):
       "content":super(JSFile,self).content
       }
 
-    if self.index.get_config('main',None) == self.src:
-      root.to_run.append( filename )
-      #template = '%s\n%s'%(template,templates.jsautorun%{ 'index_name':root.manifest.name, 'filename':filename })
+    if self.index.get_config('main',None) == self.src and self.index.to_call.count( filename ) == 0:
+      self.index.to_call.append( filename )
+      logger.info('Added "%s" to "to call" list.'%filename)
 
     return template
 

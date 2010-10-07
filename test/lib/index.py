@@ -55,7 +55,7 @@ class TestIndex(unittest.TestCase):
     self.assertEqual( paths[1], 'foo/foo.js')
     self.assertEqual( paths[2], 'bar/bar.js')
 
-  def testAutorun(self):
+  def testMainModule(self):
     self.index._manifest_['build']['main'] = 'corge.js'
     self.assertTrue( self.index.content.find( '._jsbuild_.getModuleByFilename("corge.js").call()' ) > -1 )
 
@@ -109,8 +109,6 @@ class LayoutTests(unittest.TestCase):
     setattr(self.eggs, 'read', lambda *args: 'alert("eggs says hello")')
     self.baz.dependencies.append(self.eggs)
 
-    
-
   def testPackageTree(self):
     self.root.src = '/home/azer/newproject/manifest.json'
     self.root._manifest_ = Manifest({
@@ -162,10 +160,10 @@ class LayoutTests(unittest.TestCase):
 
     autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.root.content)
     self.assertEqual( len(autorun_paths), 4 )
-    self.assertEqual( autorun_paths[0], 'corge.js')
-    self.assertEqual( autorun_paths[1], 'foo/qux.js')
+    self.assertEqual( autorun_paths[0], 'foo/qux.js')
+    self.assertEqual( autorun_paths[1], 'bar/baz/grault/eggs.js')    
     self.assertEqual( autorun_paths[2], 'bar/quux.js')
-    self.assertEqual( autorun_paths[3], 'bar/baz/grault/eggs.js')    
+    self.assertEqual( autorun_paths[3], 'corge.js')
 
   def testGatheredTree(self):
     self.root.src = '/home/azer/newproject/build/manifests/root.json'
@@ -218,10 +216,10 @@ class LayoutTests(unittest.TestCase):
 
     autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.root.content)
     self.assertEqual( len(autorun_paths), 4 )
-    self.assertEqual( autorun_paths[0], 'corge.js')
-    self.assertEqual( autorun_paths[1], 'foo/qux.js')
+    self.assertEqual( autorun_paths[0], 'foo/qux.js')
+    self.assertEqual( autorun_paths[1], 'bar/baz/grault/eggs.js')    
     self.assertEqual( autorun_paths[2], 'bar/quux.js')
-    self.assertEqual( autorun_paths[3], 'bar/baz/grault/eggs.js')    
+    self.assertEqual( autorun_paths[3], 'corge.js')
 
   def testSplittedManifests(self):
     self.root.src = '/home/azer/newproject/manifests/root.json'
@@ -291,8 +289,8 @@ class LayoutTests(unittest.TestCase):
 
     autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.bar.content)
     self.assertEqual( len(autorun_paths), 2 )
-    self.assertEqual( autorun_paths[0], 'bar/quux.js')
-    self.assertEqual( autorun_paths[1], 'bar/baz/grault/eggs.js')
+    self.assertEqual( autorun_paths[0], 'bar/baz/grault/eggs.js')
+    self.assertEqual( autorun_paths[1], 'bar/quux.js')
     
 class TestJSONIndex(unittest.TestCase):
   def setUp(self):
