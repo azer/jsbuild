@@ -8,5 +8,5 @@ with open('%s/package.js'%DIR) as pkg_template:
 with open('%s/module.js'%DIR) as mod_template:
   jsmodule = mod_template.read()
 
-with open('%s/autorun.js'%DIR) as autorun_template:
-  jsautorun = autorun_template.read()
+with open('%s/maincall.js'%DIR) as maincall_template:
+  jsmaincall = maincall_template.read()

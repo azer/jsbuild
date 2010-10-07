@@ -35,7 +35,7 @@ class Index(Dependency):
     if not self.index: content = templates.jspackage%{ "name":name, "content":content }
 
     for flname in self.to_run:
-      content = '%s\n%s'%(content,templates.jsautorun%{ "index_name":self.manifest.name, "filename":flname})
+      content = '%s\n%s'%(content,templates.jsmain%{ "index_name":self.manifest.name, "filename":flname})
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
