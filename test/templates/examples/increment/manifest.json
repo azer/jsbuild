@@ -1,0 +1,13 @@
+{
+  "name":"foobar",
+  "version":"1.0",
+  "description":"Sample package for CommonJS. This package demonstrates the usage of JSBuild.",
+  "build":{
+    "main":"program.js",
+    "files":[
+      "math.js",
+      "increment.js",
+      "program.js"
+    ]
+  }
+}
