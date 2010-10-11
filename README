@@ -1,5 +1,6 @@
-JSBuild is a command-line build utility that provides using CommonJS modules on web without any need
-of source code modification, works unobtrusive and supports packages specification as well.
+Providing running CommonJS modules on the web without any need of source code modification, JSBuild
+is a new Python library and a command-line utility that builds specified CommonJS modules and
+packages by generating unobtrusive Javascript code.
 
 Download and Install
 --------------------
@@ -12,7 +13,7 @@ To Install:
   $ cd jsbuild
   $ python3 setup.py install
 
-Now you should be able to call _jsbuild_ command which merges the Javascript files defined in the
+Now you should be able to call "jsbuild" command which merges the Javascript files defined in the
 specified manifest file. You may run this command without any parameter to test your installation,
 it should raise an output like this:
   
