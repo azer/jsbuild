@@ -100,7 +100,7 @@
               scripts.push( $('info-file').getAttribute('data-path') );
 
               each( $('info-file').getAttribute('data-dependencies').split('|'), function(el){
-                /[^\s]+/.test(el) && scripts.push(el);
+                /[^\s]+/.test(el) && (el=el.replace(/^\s+/g,'')) && scripts.push(el);
               });
 
               load(scripts,set);
