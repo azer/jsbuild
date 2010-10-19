@@ -9,6 +9,15 @@ from jsbuild import templates
 import os.path
 import re
 
+clean_backdir = lambda path: re.sub('^(\.\.\/)+','',path)
+count_backdir = lambda path: get_backdir(path).count('../')
+has_backdir = lambda path: re.match('^\.\.',path) and True or False
+join_path = lambda *args: os.path.normpath(os.path.join(*args))
+
+def get_backdir(path):
+  match = re.findall('^(?:\.\.\/)+',path)
+  return match[0] if len(match) else ''
+
 class Index(Dependency):
   def __init__(self,*args,**kwargs):
     super(Index,self).__init__(*args,**kwargs)
@@ -36,7 +45,7 @@ class Index(Dependency):
       content = templates.jspackage%{ "name":name, "content":content }
 
     for flname in self.to_call:
-      content = '%s\n%s'%(content,templates.jsmaincall%{ "index_name":self.manifest.name, "filename":flname})
+      content = '%s\n%s'%(content,templates.jsmaincall%{ "index_name":root.manifest.name, "filename":flname})
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
@@ -61,6 +70,30 @@ class Index(Dependency):
   @property
   def source_dir(self):
     return os.path.normpath(os.path.join(self.working_dir,self.get_config('dir','')))
+
+  @property
+  def path(self):
+    logger.debug('Trying to find client-side path of "%s" (:working_dir %s :source_dir %s)'%(self.src,self.working_dir,self.source_dir))
+
+    if not self.index: return ''
+
+    parent = self.index
+    parent_ref = re.findall('^(?:\.\.\/)+',os.path.dirname(self.src))[0] if has_backdir(self.src) else ''
+
+    while parent and has_backdir(parent_ref):
+      parent_dir = join_path(os.path.dirname(parent.src) if parent.index else '',parent.get_config('dir',''))
+      parent_dir_merged = join_path(clean_backdir(parent_dir),parent_ref)
+
+      if len(parent_dir_merged)>0 and not parent_dir_merged=='.' and (not has_backdir(parent_dir_merged)): 
+        break
+
+      parent_ref = join_path(parent_dir,parent_ref)
+      parent = parent.index
+    
+    path = join_path(parent.path if parent else '',re.sub('^(\.\./)+','',os.path.dirname(self.src)))
+
+    return path if path!='.' else ''
+
 
   def import_manifest(self):
     logger.debug('Importing manifest document')

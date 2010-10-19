@@ -71,9 +71,10 @@ var %(name)s = (function(globals,undefined){
 
       !/\.js(\?.*)?$/.test(path) && ( path = path+'.js' );
 
-      var uri = resolvePath(path,workingDir), mod = cache[uri];
+      var uri = /^\./.test(path) && resolvePath(path,workingDir) || path, 
+          mod = cache[uri];
 
-      if(!mod) throw new Error('Cannot find module "'+path+'". (Working Dir:'+workingDir+', URI:'+uri+' )')
+      if(!mod) throw new Error('Cannot find module "'+path+'". (Working Dir:'+workingDir+', URI:'+uri+' )');
 
       mod.exports==null && mod.call();
 

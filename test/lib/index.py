@@ -10,6 +10,7 @@ from jsbuild.jsonindex import JSONIndex
 from jsbuild.jsfile import JSFile
 from jsbuild.manifest import Manifest
 
+"""
 class TestIndex(unittest.TestCase):
   def setUp(self):
     self.index = Index()
@@ -58,7 +59,7 @@ class TestIndex(unittest.TestCase):
   def testMainModule(self):
     self.index._manifest_['build']['main'] = 'corge.js'
     self.assertTrue( self.index.content.find( '._jsbuild_.getModuleByFilename("corge.js").call()' ) > -1 )
-
+"""
 class LayoutTests(unittest.TestCase):
   def setUp(self):
     self.root = Index()
@@ -109,22 +110,21 @@ class LayoutTests(unittest.TestCase):
     setattr(self.eggs, 'read', lambda *args: 'alert("eggs says hello")')
     self.baz.dependencies.append(self.eggs)
 
-  def testPackageTree(self):
+  def testBasicHierarchy(self):
     self.root.src = '/home/azer/newproject/manifest.json'
     self.root._manifest_ = Manifest({
       'name':'root',
       'build':{
          'dir':'lib',
          'filename':'/tmp/jsb_test_build',
-         'main':'corge.js',
-         'files':[
-            'foo/manifest.json',
-            'bar/manifest.json'
-          ]
+         'main':'corge.js'
        }
     })
 
+    self.assertEqual(self.root.path, '')
+
     self.foo.src = 'foo/manifest.json'
+    self.foo.index = self.root
     self.foo._manifest_ = Manifest({
       'name':'foo',
       'build':{
@@ -133,7 +133,10 @@ class LayoutTests(unittest.TestCase):
       }
     })
 
+    self.assertEqual(self.foo.path, 'foo')
+
     self.bar.src = 'bar/manifest.json'
+    self.bar.index = self.foo
     self.bar._manifest_ = Manifest({
       'name':'bar',
       'build':{
@@ -142,30 +145,142 @@ class LayoutTests(unittest.TestCase):
        }
     })
 
+    self.assertEqual(self.bar.path, 'foo/bar')
+
     self.baz.src = 'baz/manifest.json'
+    self.baz.index = self.bar
     self.baz._manifest_ = Manifest({
       'name':'baz',
       'build':{
-         'main':'grault/eggs.js',
          'dir':'lib'
        }
     })
 
+    self.assertEqual(self.baz.path, 'foo/bar/baz')
+
     module_paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    self.assertEqual( len(module_paths), 5)
+    self.assertEqual( module_paths[0], 'corge.js')
+    self.assertEqual( module_paths[1], 'foo/qux.js')
+    self.assertEqual( module_paths[2], 'foo/bar/quux.js')
+    self.assertEqual( module_paths[3], 'foo/bar/baz/grault/spam.js')
+    self.assertEqual( module_paths[4], 'foo/bar/baz/grault/eggs.js')
+  
+  def testMixedHierarchy(self):
+    self.root.src = '/home/azer/newproject/manifest.json'
+    self.root._manifest_ = Manifest({
+      'name':'root',
+      'build':{
+       }
+    })
+
+    self.assertEqual(self.root.path, '')
+
+    self.foo.src = 'foo/manifest.json'
+    self.foo.index = self.root
+    self.foo._manifest_ = Manifest({
+      'name':'foo',
+      'build':{
+      }
+    })
+
+    self.assertEqual(self.foo.path, 'foo')
+
+    self.bar.src = '../bar/manifest.json'
+    self.bar.index = self.foo
+    self.bar._manifest_ = Manifest({
+      'name':'bar',
+      'build':{
+         'main':'quux.js',
+       }
+    })
+
+    self.assertEqual(self.bar.path, 'bar')
+
+    self.baz.src = '../baz/manifest.json'
+    self.baz.index = self.bar
+    self.baz._manifest_ = Manifest({
+      'name':'baz',
+      'build':{}
+    })
+
+    self.assertEqual(self.baz.path, 'baz')
+
+    module_paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    self.assertEqual( len(module_paths), 5)
     self.assertEqual( module_paths[0], 'corge.js')
     self.assertEqual( module_paths[1], 'foo/qux.js')
     self.assertEqual( module_paths[2], 'bar/quux.js')
-    self.assertEqual( module_paths[3], 'bar/baz/grault/spam.js')
-    self.assertEqual( module_paths[4], 'bar/baz/grault/eggs.js')
+    self.assertEqual( module_paths[3], 'baz/grault/spam.js')
+    self.assertEqual( module_paths[4], 'baz/grault/eggs.js')    
 
-    autorun_paths = re.findall('getModuleByFilename\("([^"]+)"\)\.call',self.root.content)
-    self.assertEqual( len(autorun_paths), 4 )
-    self.assertEqual( autorun_paths[0], 'foo/qux.js')
-    self.assertEqual( autorun_paths[1], 'bar/baz/grault/eggs.js')    
-    self.assertEqual( autorun_paths[2], 'bar/quux.js')
-    self.assertEqual( autorun_paths[3], 'corge.js')
+
+  def testChaoticHierarchy(self):
+    self.root.src = 'projects/new/manifest.json'
+    self.root._manifest_ = Manifest({
+      'name':'root',
+      'build':{
+         'dir':'root_dir',
+         'main':'corge.js',
+         'files':[
+            'foo.json'
+          ]
+       }
+    })
+
+    self.assertEqual(self.root.path, '')
+    self.assertEqual(self.root.source_dir, 'projects/new/root_dir')
+
+    self.foo.src = '../foo/manifest.json'
+    self.foo._manifest_ = Manifest({
+      'name':'foo',
+      'build':{
+        'dir':'foo_dir_1/foo_dir_2'
+      }
+    })
+
+    self.assertEqual(self.foo.path, 'foo')
+    self.assertEqual(self.foo.source_dir, 'projects/new/foo/foo_dir_1/foo_dir_2')
+
+    self.bar.src = '../bar/manifest.json'
+    self.bar.index = self.foo
+    self.bar._manifest_ = Manifest({
+      'name':'bar',
+      'build':{
+       }
+    })
+
+    self.assertEqual(self.bar.path, 'foo/bar')
+    self.assertEqual(self.bar.source_dir, 'projects/new/foo/foo_dir_1/bar')
+
+    self.baz.src = '../../../baz.json'
+    self.baz.index = self.bar
+    self.baz._manifest_ = Manifest({
+      'name':'baz',
+      'build':{
+        "dir":"../old/baz_src",
+        'files':[
+          'grault/spam.js',
+          'grault/eggs.js'  
+        ]
+       }
+    })
+
+    self.assertEqual(self.baz.path, '')
+
+    self.assertEqual(self.baz.source_dir, 'projects/old/baz_src')
+
+    module_paths = re.findall('defineModule\("([^"]+)"',self.root.content)
+    
+    self.assertEqual( module_paths[0], 'corge.js')
+    self.assertEqual( module_paths[1], 'foo/qux.js')
+    self.assertEqual( module_paths[2], 'foo/bar/quux.js')
+    self.assertEqual( module_paths[3], 'grault/spam.js')
+    self.assertEqual( module_paths[4], 'grault/eggs.js')
+
 
   def testGatheredTree(self):
+    raise Exception('Not Implemented')
     self.root.src = '/home/azer/newproject/build/manifests/root.json'
     self.root._manifest_ = Manifest({
       'name':'root',
@@ -220,6 +335,7 @@ class LayoutTests(unittest.TestCase):
     self.assertEqual( autorun_paths[1], 'bar/baz/grault/eggs.js')    
     self.assertEqual( autorun_paths[2], 'bar/quux.js')
     self.assertEqual( autorun_paths[3], 'corge.js')
+
 
   def testSplittedManifests(self):
     self.root.src = '/home/azer/newproject/manifests/root.json'
