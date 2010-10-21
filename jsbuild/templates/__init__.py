@@ -10,3 +10,6 @@ with open('%s/module.js'%DIR) as mod_template:
 
 with open('%s/maincall.js'%DIR) as maincall_template:
   jsmaincall = maincall_template.read()
+
+with open('%s/file.js'%DIR) as fl_template:
+  jsfile = fl_template.read()

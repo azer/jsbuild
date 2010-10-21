@@ -10,7 +10,6 @@ from jsbuild.jsonindex import JSONIndex
 from jsbuild.jsfile import JSFile
 from jsbuild.manifest import Manifest
 
-"""
 class TestIndex(unittest.TestCase):
   def setUp(self):
     self.index = Index()
@@ -59,7 +58,7 @@ class TestIndex(unittest.TestCase):
   def testMainModule(self):
     self.index._manifest_['build']['main'] = 'corge.js'
     self.assertTrue( self.index.content.find( '._jsbuild_.getModuleByFilename("corge.js").call()' ) > -1 )
-"""
+
 class LayoutTests(unittest.TestCase):
   def setUp(self):
     self.root = Index()
@@ -68,7 +67,7 @@ class LayoutTests(unittest.TestCase):
     self.corge = JSFile()
     self.corge.index = self.root
     self.corge.src = 'corge.js'
-    setattr(self.corge, 'read', lambda *args: 'alert("corge says hello")')
+    setattr(self.corge, 'read', lambda *args: 'alert("corge says hello"); exports.sth = 1;')
     self.root.dependencies.append(self.corge)
     
     self.foo = Index()
@@ -79,7 +78,7 @@ class LayoutTests(unittest.TestCase):
     self.qux = JSFile()
     self.qux.index = self.foo
     self.qux.src = 'qux.js'
-    setattr(self.qux, 'read', lambda *args: 'alert("qux says hello")')
+    setattr(self.qux, 'read', lambda *args: 'alert("qux says hello"); exports.sth = 1;')
     self.foo.dependencies.append(self.qux)
 
     self.bar = Index()
@@ -90,7 +89,7 @@ class LayoutTests(unittest.TestCase):
     self.quux = JSFile()
     self.quux.index = self.bar
     self.quux.src = 'quux.js'
-    setattr(self.quux, 'read', lambda *args: 'alert("quux says hello")')
+    setattr(self.quux, 'read', lambda *args: 'alert("quux says hello"); exports.sth = 1;')
     self.bar.dependencies.append(self.quux)
 
     self.baz = Index()
@@ -101,15 +100,15 @@ class LayoutTests(unittest.TestCase):
     self.spam = JSFile()
     self.spam.index = self.baz
     self.spam.src = 'grault/spam.js'
-    setattr(self.spam, 'read', lambda *args: 'alert("spam says hello")')
+    setattr(self.spam, 'read', lambda *args: 'alert("spam says hello"); exports.sth = 1;')
     self.baz.dependencies.append(self.spam)
 
     self.eggs = JSFile()
     self.eggs.index = self.baz
     self.eggs.src = 'grault/eggs.js'
-    setattr(self.eggs, 'read', lambda *args: 'alert("eggs says hello")')
+    setattr(self.eggs, 'read', lambda *args: 'alert("eggs says hello"); exports.sth = 1;')
     self.baz.dependencies.append(self.eggs)
-
+  
   def testBasicHierarchy(self):
     self.root.src = '/home/azer/newproject/manifest.json'
     self.root._manifest_ = Manifest({
@@ -214,7 +213,6 @@ class LayoutTests(unittest.TestCase):
     self.assertEqual( module_paths[3], 'baz/grault/spam.js')
     self.assertEqual( module_paths[4], 'baz/grault/eggs.js')    
 
-
   def testChaoticHierarchy(self):
     self.root.src = 'projects/new/manifest.json'
     self.root._manifest_ = Manifest({
@@ -277,7 +275,6 @@ class LayoutTests(unittest.TestCase):
     self.assertEqual( module_paths[2], 'foo/bar/quux.js')
     self.assertEqual( module_paths[3], 'grault/spam.js')
     self.assertEqual( module_paths[4], 'grault/eggs.js')
-
 
   def testGatheredTree(self):
     raise Exception('Not Implemented')

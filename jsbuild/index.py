@@ -9,14 +9,14 @@ from jsbuild import templates
 import os.path
 import re
 
-clean_backdir = lambda path: re.sub('^(\.\.\/)+','',path)
+clean_backdir = lambda path: re.sub('^(\.\.\/?)+','',path)
 count_backdir = lambda path: get_backdir(path).count('../')
 has_backdir = lambda path: re.match('^\.\.',path) and True or False
 join_path = lambda *args: os.path.normpath(os.path.join(*args))
 
 def get_backdir(path):
-  match = re.findall('^(?:\.\.\/)+',path)
-  return match[0] if len(match) else ''
+  search = re.search('((?:\.\.\/)+)',path)
+  return os.path.normpath(search.groups()[0]) if search else ''
 
 class Index(Dependency):
   def __init__(self,*args,**kwargs):
@@ -78,22 +78,28 @@ class Index(Dependency):
     if not self.index: return ''
 
     parent = self.index
-    parent_ref = re.findall('^(?:\.\.\/)+',os.path.dirname(self.src))[0] if has_backdir(self.src) else ''
+    parent_ref = get_backdir(self.src)
 
     while parent and has_backdir(parent_ref):
+      print('parent.src: %s'%parent.src)
       parent_dir = join_path(os.path.dirname(parent.src) if parent.index else '',parent.get_config('dir',''))
       parent_dir_merged = join_path(clean_backdir(parent_dir),parent_ref)
 
+      print('parent_ref: %s'%parent_ref,'parent_dir: %s'%parent_dir,'parent_dir_merged: %s'%parent_dir_merged)
+
       if len(parent_dir_merged)>0 and not parent_dir_merged=='.' and (not has_backdir(parent_dir_merged)): 
+        print('breaking ',parent.src)
         break
 
-      parent_ref = join_path(parent_dir,parent_ref)
+      print('before change: %s'%os.path.join(parent_dir,parent_ref))
+      parent_ref = join_path(parent_dir if parent.index and parent.index.index else clean_backdir(parent_dir),parent_ref)
+      print('changed parent_ref: %s'%parent_ref)
       parent = parent.index
     
-    path = join_path(parent.path if parent else '',re.sub('^(\.\./)+','',os.path.dirname(self.src)))
+    print('done yo.',(parent.path,parent.src) if parent else None,self.src,(os.path.dirname(self.src)))
+    path = join_path(parent.path if parent else '',clean_backdir(os.path.dirname(self.src)))
 
     return path if path!='.' else ''
-
 
   def import_manifest(self):
     logger.debug('Importing manifest document')
