@@ -81,22 +81,15 @@ class Index(Dependency):
     parent_ref = get_backdir(self.src)
 
     while parent and has_backdir(parent_ref):
-      print('parent.src: %s'%parent.src)
       parent_dir = join_path(os.path.dirname(parent.src) if parent.index else '',parent.get_config('dir',''))
       parent_dir_merged = join_path(clean_backdir(parent_dir),parent_ref)
 
-      print('parent_ref: %s'%parent_ref,'parent_dir: %s'%parent_dir,'parent_dir_merged: %s'%parent_dir_merged)
-
       if len(parent_dir_merged)>0 and not parent_dir_merged=='.' and (not has_backdir(parent_dir_merged)): 
-        print('breaking ',parent.src)
         break
 
-      print('before change: %s'%os.path.join(parent_dir,parent_ref))
       parent_ref = join_path(parent_dir if parent.index and parent.index.index else clean_backdir(parent_dir),parent_ref)
-      print('changed parent_ref: %s'%parent_ref)
       parent = parent.index
     
-    print('done yo.',(parent.path,parent.src) if parent else None,self.src,(os.path.dirname(self.src)))
     path = join_path(parent.path if parent else '',clean_backdir(os.path.dirname(self.src)))
 
     return path if path!='.' else ''
