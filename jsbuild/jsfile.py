@@ -10,13 +10,13 @@ class JSFile(Dependency):
   @property
   def content(self):
     source_code = super(JSFile,self).content
-    template = templates.jsfile
+    template = templates.file
     params = { "content":source_code }
 
     if is_module(source_code):
       parents = []
       root = self
-      template = templates.jsmodule
+      template = templates.module
   
       while root.index:
         root = root.index

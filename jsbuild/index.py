@@ -42,10 +42,10 @@ class Index(Dependency):
     content = '\n'.join(map(lambda dep: dep.content if not isinstance(dep,Index) or not dep.get_config('filename',False) else dep.put() or '', self.dependencies))
 
     if not self.index: 
-      content = templates.jspackage%{ "name":name, "content":content }
+      content = templates.package%{ "name":name, "content":content }
 
     for flname in self.to_call:
-      content = '%s\n%s'%(content,templates.jsmaincall%{ "index_name":root.manifest.name, "filename":flname})
+      content = '%s\n%s'%(content,templates.maincall%{ "index_name":root.manifest.name, "filename":flname})
 
     for rpl in self.get_config('replacements',[]):
       content = re.sub(rpl['pattern'],rpl['replacement']%self.get_config('dict',{}),content,flags=re.DOTALL)
@@ -113,6 +113,6 @@ class Index(Dependency):
 
   def put(self):
     filename = os.path.normpath(os.path.join(self.working_dir, self.get_config('filename')))
-    with open('%s'%filename,'w') as fl:
+    with open('%s'%filename,'w',encoding='utf-8') as fl:
       fl.write(self.content)
     logger.info('Writing %s OK'%filename)

@@ -2,8 +2,7 @@
 import unittest
 import sys
 import re
-sys.path.append('../../')
-sys.path.pop(0)
+sys.path.insert(0,'../../')
 
 from jsbuild.index import Index
 from jsbuild.jsonindex import JSONIndex

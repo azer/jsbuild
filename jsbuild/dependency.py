@@ -34,5 +34,5 @@ class Dependency:
   def read(self):
     path = os.path.normpath(os.path.join(self.index.source_dir if self.index else '',self.src))
     logger.debug("Trying to read file '%s'"%path)
-    with open(path) as fl:
+    with open(path,encoding='utf-8') as fl:
       return fl.read()

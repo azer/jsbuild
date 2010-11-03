@@ -1,15 +1,10 @@
-from os.path import dirname
+import os.path
+from jsbuild.logging import logger
 
-DIR = dirname(__file__)
+DIR = os.path.dirname(__file__)
+TEMPLATES = ['package.js','module.js','maincall.js','file.js']
 
-with open('%s/package.js'%DIR) as pkg_template:
-  jspackage = pkg_template.read()
-
-with open('%s/module.js'%DIR) as mod_template:
-  jsmodule = mod_template.read()
-
-with open('%s/maincall.js'%DIR) as maincall_template:
-  jsmaincall = maincall_template.read()
-
-with open('%s/file.js'%DIR) as fl_template:
-  jsfile = fl_template.read()
+for filename, template in map(lambda path: (os.path.normpath(os.path.join(DIR,path)),os.path.splitext(path)[0]), TEMPLATES):
+  logger.debug('Trying to read the template named "%s" and located at "%s"'%(template,filename))
+  with open(filename,encoding='utf-8') as source_code:
+    globals()[template] = source_code.read()
