@@ -15,9 +15,11 @@ class Test:
   def pattern(self,exp):
     self._pattern_ = re.compile(exp) if exp else None
 
-functions = re.compile('\(?(function[\s\w\_\$]*)\s*\([\s\w\$\,\/\*\_]*\)\{.*\}(\)\([\s\w\$\,\/\*\_]*\))?;?',re.DOTALL)
+functions = re.compile('\(?(function[\s\w\_\$]*)\s*\([\s\w\$\,\/\*\_]*\)\{.*?\}(\)\([\s\w\$\,\/\*\_]*\))?;?',re.DOTALL)
+#functions = re.compile('\{.*?\}',re.DOTALL)
 
 module_tests = (
+  Test('module\.exports',20),
   Test('exports\.([\w\$]+)\s*\=', 10),
   Test('\=\s*require\(', 10)
 )
@@ -30,10 +32,11 @@ file_tests = (
 run_test = lambda source_code, test: test.score if test.pattern.search(source_code) else 0
 
 def is_module(source_code):
-  source_code = functions.sub('\\1',source_code)
+  source_code = functions.sub('',source_code)
   testrunner = partial(run_test,source_code)
   mod_score = sum(map(testrunner,module_tests))
   file_score = sum(map(testrunner,file_tests))
+
   return True if mod_score>file_score else bool(mod_score==file_score and mod_score)
 
 if __name__ == '__main__':
