@@ -1,4 +1,3 @@
-from jsbuild.detectcjs import is_module
 from jsbuild.dependency import Dependency
 from jsbuild.maps import FORMATS
 from jsbuild.logging import logger
@@ -13,23 +12,22 @@ class JSFile(Dependency):
     template = templates.file
     params = { "content":source_code }
 
-    if is_module(source_code):
-      parents = []
-      root = self
-      template = templates.module
-  
-      while root.index:
-        root = root.index
-        parents.insert(0,root)
+    parents = []
+    root = self
+    template = templates.module
 
-      filename = os.path.normpath( os.path.join(self.index.path, self.src) )
+    while root.index:
+      root = root.index
+      parents.insert(0,root)
 
-      params['name'] = root.manifest.name
-      params['filename'] = filename
+    filename = os.path.normpath( os.path.join(self.index.path, self.src) )
 
-      if self.index.get_config('main',None) == self.src and self.index.to_call.count( filename ) == 0:
-        self.index.to_call.append( filename )
-        logger.info('Added "%s" to "to call" list.'%filename)
+    params['name'] = root.manifest.name
+    params['filename'] = filename
+
+    if self.index.get_config('main',None) == self.src and self.index.to_call.count( filename ) == 0:
+      self.index.to_call.append( filename )
+      logger.info('Added "%s" to "to call" list.'%filename)
 
     return template%params
 
