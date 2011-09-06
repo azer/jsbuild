@@ -1,0 +1,17 @@
+{
+  "name":"jsbuild",
+  "version":"1.0.0",
+  "description":"Command-line build utility for making CommonJS modules work on web browsers.",
+  "author":"Azer Koculu <azer@kodfabrik.com>",
+  "keywords":["build","commonjs","browser"],
+  "directories":{ "lib": "./lib" },
+  "main":"./lib/jsbuild.js",
+  "bin":{
+    "combiner":"./bin/jsbuild.js"
+  },
+  "dependencies":{
+    "npm":"*",
+    "combiner":"1.0.x",
+    "mustache":"0.3.x"
+  }
+}
