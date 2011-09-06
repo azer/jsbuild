@@ -1,2 +1,0 @@
-include jsbuild README
-recursive-include jsbuild/templates *
