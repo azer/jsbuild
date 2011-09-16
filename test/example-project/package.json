@@ -1,6 +1,6 @@
 {
   "name":"example-project",
-  "main":"lib/a",
+  "main":"./lib/a",
   "dependencies":{
     "dependency":"*",
     "sibling":"*"

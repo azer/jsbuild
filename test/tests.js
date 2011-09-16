@@ -47,25 +47,29 @@ function test_collectDeps(callback){
 
 function test_loadPackage(callback){
   jsbuild.loadPackage('test/example-project/', function(error, pkg){
-    if(error){
-      throw error;
+    if(error) return callback(error);
+  
+    try {
+      assert.equal(pkg.name, 'example-project');
+      assert.equal(pkg.manifest.name, 'example-project');
+      assert.equal(pkg.manifestPath, 'test/example-project/package.json');
+      assert.equal(pkg.dependencies.length, 2);
+      assert.equal(pkg.main.filename, 'a.js');
+
+      var pkgDict = Object.keys(pkg.packageDict);
+      assert.equal(pkgDict.length, 4);
+      assert.equal(pkgDict[0], 'example-project');
+      assert.equal(pkgDict[1], 'dependency');
+      assert.equal(pkgDict[2], 'subdependency');
+      assert.equal(pkgDict[3], 'sibling');
+
+      assert.equal(pkg.modules.length, 2);
+      assert.equal(pkg.modules[0].filename, 'a.js');
+      assert.equal(pkg.modules[1].filename, 'b.js');
+      callback();
+    } catch(error) {
+      callback(error);
     }
-    assert.equal(pkg.name, 'example-project');
-    assert.equal(pkg.manifest.name, 'example-project');
-    assert.equal(pkg.manifestPath, 'test/example-project/package.json');
-    assert.equal(pkg.dependencies.length, 2);
-
-    var pkgDict = Object.keys(pkg.packageDict);
-    assert.equal(pkgDict.length, 4);
-    assert.equal(pkgDict[0], 'example-project');
-    assert.equal(pkgDict[1], 'dependency');
-    assert.equal(pkgDict[2], 'subdependency');
-    assert.equal(pkgDict[3], 'sibling');
-
-    assert.equal(pkg.modules.length, 2);
-    assert.equal(pkg.modules[1].filename, 'lib/a.js');
-    assert.equal(pkg.modules[0].filename, 'lib/b.js');
-    callback();
   });
 }
 
@@ -73,8 +77,8 @@ function test_collectModules(callback){
   jsbuild.collectModules({ 'workingDir':'test/example-project/' }, function(error, modules){
     try {
       assert.equal(modules.length, 2);
-      assert.equal(modules[1].filename, 'lib/a.js');
-      assert.equal(modules[0].filename, 'lib/b.js');
+      assert.equal(modules[0].filename, 'a.js');
+      assert.equal(modules[1].filename, 'b.js');
       callback();
     } catch(exc) {
       callback(exc);
