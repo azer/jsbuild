@@ -1,6 +1,6 @@
 Providing running CommonJS modules on the web without any need of source code modification, JSBuild
 is a new Python library and a command-line utility that builds specified CommonJS modules and
-packages by generating unobtrusive Javascript code. Documentation is available at http://jsbuild.kodfabrik.com
+packages by generating unobtrusive Javascript code. Documentation is available at [http://jsbuild.kodfabrik.com](https://web.archive.org/web/20110204144234/http://jsbuild.kodfabrik.com/)
 
 Installation
 ------------
